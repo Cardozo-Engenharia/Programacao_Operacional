@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Programação Operacional — Cardozo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&amp;family=Inter:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#101C2B; --ink2:#2A3A4D; --mut:#68737F;
+  --bg:#EDF0F3; --card:#FFFFFF; --line:#DCE2E9; --line2:#EDF0F4;
+  --cdz:#1551A7; --cdz-dk:#0C3A78; --cdz-soft:#E7EFFA;
+  --t1:#9A5B00; --t1-bg:#FFF0D4; --t1-br:#F0C878;
+  --t2:#2E3E8F; --t2-bg:#E6E9FB; --t2-br:#B3BCEC;
+  --fg:#7A838D; --fg-bg:#EAEDF0;
+  --lamp:#F2B705;
+  --ok:#1E7A4B;
+  --disp:'Barlow Condensed','Oswald','Arial Narrow',Inter,system-ui,sans-serif;
+  --body:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --r:14px;
+  --pad:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:var(--body);
+  font-size:15px; line-height:1.45;
+  padding-bottom:48px;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:760px;margin:0 auto}
+.mono{font-family:var(--mono)}
+h1,h2,h3,.disp{font-family:var(--disp);letter-spacing:.01em;margin:0}
+
+/* ── Cabeçalho ── */
+header{
+  background:linear-gradient(160deg,#12283F 0%,#0C3A78 60%,#1551A7 100%);
+  color:#fff; padding:14px var(--pad) 13px; position:relative; overflow:hidden;
+}
+header .logo{display:block;height:31px;width:auto;background:#fff;border-radius:8px;
+  padding:6px 10px;margin-bottom:11px;box-sizing:content-box;max-width:calc(100% - 20px);object-fit:contain}
+header:after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;
+  background:linear-gradient(90deg,var(--lamp) 0%,var(--lamp) 22%,rgba(242,183,5,.15) 22%)}
+.eyebrow{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:#9DC0EC;font-weight:600}
+header h1{font-size:32px;font-weight:700;text-transform:uppercase;
+  line-height:1.05;margin:0;white-space:nowrap;overflow:hidden}
+.hdr-meta{font-size:12.5px;color:#BDD5F0;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.hdr-meta b{color:#fff;font-weight:600}
+
+/* ── Faixa "hoje" ── */
+.hoje{background:var(--card);padding:12px var(--pad) 4px;border-bottom:1px solid var(--line)}
+.hoje-cab{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px;gap:8px}
+.hoje-cab .d{font-family:var(--disp);font-size:21px;font-weight:700;text-transform:uppercase}
+.hoje-cab .s{font-size:11.5px;color:var(--mut)}
+.btn-hoje{background:var(--cdz-soft);color:var(--cdz-dk);border:none;border-radius:99px;
+  font-size:11.5px;font-weight:600;padding:5px 11px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.letras{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.lt{border-radius:12px;padding:9px 4px 8px;text-align:center;border:1.5px solid transparent}
+.lt .n{font-family:var(--disp);font-size:27px;font-weight:700;line-height:1}
+.lt .t{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-top:2px}
+.lt .h{font-size:9.5px;margin-top:1px;opacity:.85}
+.lt.T1{background:var(--t1-bg);border-color:var(--t1-br);color:var(--t1)}
+.lt.T2{background:var(--t2-bg);border-color:var(--t2-br);color:var(--t2)}
+.lt.F{background:var(--fg-bg);color:var(--fg)}
+
+/* ── Régua de dias ── */
+.regua-box{background:var(--card);padding:0 0 10px;border-bottom:1px solid var(--line)}
+.regua{display:flex;gap:6px;overflow-x:auto;padding:2px var(--pad) 6px;
+  scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.regua::-webkit-scrollbar{display:none}
+.dia{flex:0 0 auto;width:52px;scroll-snap-align:center;border:1px solid var(--line);
+  border-radius:11px;background:#fff;padding:5px 3px 4px;cursor:pointer;text-align:center}
+.dia.sel{border-color:var(--cdz);box-shadow:0 0 0 2px rgba(21,81,167,.16)}
+.dia.hoje-d .dd{color:var(--cdz);}
+.dia .ds{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-weight:600}
+.dia .dd{font-family:var(--disp);font-size:19px;font-weight:700;line-height:1.05}
+.dia .cells{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5px;margin-top:3px}
+.dia .c{height:12px;border-radius:2.5px;font-size:7.5px;font-weight:700;line-height:12px;color:#fff}
+.c.T1{background:#E2A63C}.c.T2{background:#5566C4}.c.F{background:#DFE3E8;color:#9AA3AC}
+.regua-leg{display:flex;gap:12px;padding:0 var(--pad);font-size:10.5px;color:var(--mut);flex-wrap:wrap}
+.regua-leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+
+/* ── Abas ── */
+nav.abas{position:sticky;top:0;z-index:30;background:var(--card);border-bottom:1px solid var(--line);
+  display:flex;overflow-x:auto;scrollbar-width:none}
+nav.abas::-webkit-scrollbar{display:none}
+nav.abas button{flex:1 1 0;min-width:0;background:none;border:none;padding:12px 4px 10px;white-space:nowrap;
+  font-family:var(--disp);font-size:clamp(12px,3.4vw,17px);font-weight:600;text-transform:uppercase;
+  letter-spacing:.02em;color:var(--mut);cursor:pointer;border-bottom:3px solid transparent;overflow:hidden;text-overflow:ellipsis}
+nav.abas button.on{color:var(--ink);border-bottom-color:var(--lamp)}
+
+/* ── Filtros ── */
+.filtros{background:var(--card);border-bottom:1px solid var(--line);padding:10px var(--pad)}
+.busca{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;
+  font-family:inherit;background:#F7F9FB;color:var(--ink)}
+.busca:focus{outline:2px solid rgba(21,81,167,.35);outline-offset:1px}
+.selects{display:flex;gap:6px;overflow-x:auto;margin-top:8px;scrollbar-width:none;padding-bottom:1px}
+.selects::-webkit-scrollbar{display:none}
+.selects select{flex:0 0 auto;border:1px solid var(--line);border-radius:99px;background:#F7F9FB;
+  padding:7px 26px 7px 11px;font-size:12.5px;font-family:inherit;color:var(--ink2);font-weight:500;
+  appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%2368737F'/></svg>");
+  background-repeat:no-repeat;background-position:right 10px center;max-width:46vw}
+.selects select.ativo{background-color:var(--cdz-soft);border-color:#A9C7EC;color:var(--cdz-dk);font-weight:600}
+.limpar{background:none;border:none;color:var(--cdz);font-size:12px;font-weight:600;cursor:pointer;
+  padding:7px 4px;font-family:inherit;flex:0 0 auto}
+
+/* ── Conteúdo ── */
+main{padding:12px var(--pad) 20px}
+.resumo{display:flex;gap:8px;margin-bottom:12px}
+.kpi{flex:1;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 10px}
+.kpi .v{font-family:var(--disp);font-size:26px;font-weight:700;line-height:1}
+.kpi .l{font-size:10px;white-space:nowrap;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);font-weight:600;margin-top:1px}
+.kpi.t1 .v{color:var(--t1)} .kpi.t2 .v{color:var(--t2)} .kpi.adm .v{color:var(--ink2)}
+
+.bloco{margin-bottom:18px}
+.bloco-tit{display:flex;align-items:center;gap:8px;margin:0 0 8px;padding:0 2px}
+.bloco-tit .p{font-family:var(--disp);font-size:19px;font-weight:700;text-transform:uppercase}
+.bloco-tit .pill{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:3px 8px;border-radius:99px}
+.pill.T1{background:var(--t1-bg);color:var(--t1)}
+.pill.T2{background:var(--t2-bg);color:var(--t2)}
+.pill.ADM{background:#E4EEE9;color:var(--ok)}
+.bloco-tit .hh{font-size:11.5px;color:var(--mut);margin-left:auto;font-weight:500}
+
+.sub{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);
+  margin:14px 2px 7px;display:flex;align-items:center;gap:7px}
+.sub:before{content:"";width:14px;height:2px;background:var(--lamp);border-radius:2px;flex:0 0 auto}
+
+.obra{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  margin-bottom:9px;overflow:hidden}
+.obra-cab{display:flex;align-items:center;gap:8px;padding:9px 12px 8px;border-bottom:1px solid var(--line2)}
+.obra-cab .nm{font-family:var(--disp);font-size:17.5px;font-weight:700;text-transform:uppercase;
+  line-height:1.1;flex:1;min-width:0}
+.obra-cab .sup{font-size:11px;color:var(--mut);font-weight:400;text-transform:none;font-family:var(--body);
+  display:block;margin-top:1px}
+.tags{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end;flex:0 0 auto;max-width:44%}
+.tag{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.03em;
+  border:1px solid var(--line);border-radius:5px;padding:2.5px 6px;background:#F7F9FB;color:var(--ink2);white-space:nowrap}
+.tag.placa{background:#F2F5F8;border-color:#C9D3DD;color:var(--ink);
+  box-shadow:inset 0 -1.5px 0 rgba(0,0,0,.05)}
+.tag.jcb{background:#FFF4DE;border-color:#EBC77E;color:#8A5A00}
+
+ul.pes{list-style:none;margin:0;padding:2px 0}
+ul.pes li{display:flex;align-items:center;gap:8px;padding:8px 12px;border-top:1px solid var(--line2);min-height:40px}
+ul.pes li:first-child{border-top:none}
+.let{flex:0 0 auto;width:26px;height:26px;border-radius:7px;display:grid;place-items:center;
+  font-family:var(--disp);font-size:15px;font-weight:700;background:#EFF2F6;color:var(--ink2)}
+.let.A{background:#E7EFFA;color:#12437F}.let.B{background:#E9F1E9;color:#25663A}
+.let.C{background:#FBEEE4;color:#8A4A16}.let.D{background:#EFEAF7;color:#4B3183}
+.let.par{font-size:11px;letter-spacing:-.02em}
+.let.adm{font-size:9.5px;letter-spacing:.02em}
+.nome{flex:1;min-width:0;font-size:14.5px;font-weight:500}
+.nome small{display:block;font-size:11px;color:var(--mut);font-weight:400;margin-top:-1px}
+.badges{display:flex;gap:4px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end}
+.b{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:2.5px 6px;border-radius:5px;white-space:nowrap}
+.b.vl{background:#E7EFFA;color:#12437F}
+.b.enc{background:#FFF1D4;color:#8A5A00}
+.b.otj{background:#E4EEE9;color:var(--ok)}
+.b.op{background:#F1EAF9;color:#513A86}
+.b.tst{background:#FCE9E9;color:#933}
+li.fora{opacity:.5}
+.b.data{background:#EFF2F6;color:var(--mut);text-transform:none;letter-spacing:0;font-weight:600}
+.b.fer{background:#FBEEE4;color:#8A4A16}
+
+.vazio{background:var(--card);border:1px dashed var(--line);border-radius:var(--r);
+  padding:26px 18px;text-align:center;color:var(--mut);font-size:13.5px}
+.vazio b{display:block;font-family:var(--disp);font-size:18px;color:var(--ink2);
+  text-transform:uppercase;margin-bottom:3px}
+
+/* Minha escala */
+.busca-pessoa{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px}
+.pessoa-cab{background:linear-gradient(150deg,#12283F,#1551A7);color:#fff;border-radius:var(--r);
+  padding:14px 15px;margin-bottom:10px}
+.pessoa-cab .n{font-family:var(--disp);font-size:23px;font-weight:700;text-transform:uppercase;line-height:1.05}
+.pessoa-cab .i{font-size:12.5px;color:#C3D9F2;margin-top:3px}
+.prox{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.prox .l{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--line2)}
+.prox .l:first-child{border-top:none}
+.prox .l.hj{background:#FFFBF0}
+.prox .dt{font-family:var(--mono);font-size:12.5px;font-weight:600;width:74px;flex:0 0 auto}
+.prox .dt span{color:var(--mut);font-weight:500}
+.prox .st{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:3px 9px;border-radius:99px;flex:0 0 auto}
+.prox .hr{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-left:auto}
+.sug{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.sug button{background:#F2F5F8;border:1px solid var(--line);border-radius:99px;padding:6px 11px;
+  font-size:13px;font-family:inherit;cursor:pointer;color:var(--ink2)}
+
+/* Frota */
+table.frota{width:100%;border-collapse:collapse;background:var(--card);border-radius:var(--r);
+  overflow:hidden;border:1px solid var(--line);font-size:13px}
+table.frota th{background:#F5F7FA;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--mut);text-align:left;padding:8px 10px;font-weight:700}
+table.frota td{padding:9px 10px;border-top:1px solid var(--line2);vertical-align:top}
+table.frota td:nth-child(2),table.frota td:nth-child(3){white-space:nowrap;width:1%}
+table.frota td:first-child{font-weight:500}
+
+/* Rodapé / editor */
+footer{padding:16px var(--pad) 26px;text-align:center;color:var(--mut);font-size:11.5px;line-height:1.6}
+.editor{position:fixed;left:0;right:0;bottom:0;background:var(--ink);color:#fff;padding:9px 10px;
+  display:none;gap:7px;z-index:60;justify-content:center;flex-wrap:wrap}
+.editor.on{display:flex}
+.editor button,.editor label{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.22);
+  border-radius:9px;padding:8px 13px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit}
+.editor button.pri{background:var(--lamp);color:#3A2A00;border-color:var(--lamp)}
+.editor input[type=file]{display:none}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:70px;background:var(--ink);color:#fff;
+  padding:11px 17px;border-radius:11px;font-size:13.5px;z-index:70;opacity:0;transition:.25s;
+  pointer-events:none;max-width:88vw;text-align:center}
+.toast.on{opacity:1}
+
+@media (min-width:620px){
+  :root{--pad:20px}
+  header .logo{height:36px}
+  .lt .n{font-size:32px}
+  .obra-cab .nm{font-size:19px}
+  .dia{width:58px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body style="padding-bottom: 72px;">
+<div class="wrap">
+
+<header>
+  <img class="logo" src="data:image/png;base64,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+++/5557MmpwU1PT888/39jY2NTUZE2efv1KJpOvv/56e3u71XTsvEycOLGfmNi/f/9bb70ViUSKiormzJnT0tLy8ssvNzc3r1y50qY5EZEXX3zx7bffHjNmTEFBwfbt27ds2fLpT3968eLFANDT0/Pmm282NjYqpdasWQMAO3fuPHr06PLly5VSu3fvrqqqIqLu7u5QKBQKhRzHmT9/vo1hR8T33nvv1VdfLSoqsoEqGTlYV1f32GOP1dTUTJ48WWv92muv7dy584tf/KJNdFpTU/Piiy/m5+dbPMj3fRu2b/NovPzyy8aYVCpl01KuX79+z54948aNmzNnjiXdZ7q/ceNGm59m+vTphYWFlZWVzz33nDHmYx/72MSJExFx375969evLyoqsivN+tfsnk8mk0888cSOHTvKysrC4fArr7yyf//+L37xi8XFxVZ4ici6devWr19fUlIyevTosrIyGx/sed5bb71lCwLceeedALB79+69e/cuXrw4Go02Nze/8MILd95556xZs+zwPvbYY4cOHZowYQIRPffccwcPHvzCF75gKYVW9L/99tvbtm0bN26cDV29aCD5xQSFIkfYFI/S3/4vD/7JXz1dWVnnRAs9cRmRRk5dsJFgAkQIJtU8d0re3Wtmi/iUOayEEVBEfvOb3+zbvz8UDlvg8gq3sT3NrGKXSiZnzpz1oQ99yAr4q6KiOI4TiUQeffTRefPmeZ5nzz17smmtLfNq4F2u644fP/6b3/ymRafs6SEiK1euXLJkiTHmpz/9aTKZ/N3f/V0b7Ghf5LruqlWrHnjgAQCoqqr68Y9/vGvXrsWLFxNRKBSKRCJ2uBKJxKuvvur7/le/+tWZM2d2dXU9/vjjr732mj0hrf1y5MgRZp48efKZM2daWlqKior649tKOY4zc+bMr3zlKxml1LYkG+FXSpWUlITD4erq6jlz5pw9ezYcDo8dO9buQKXU4cOH169fv2zZsk996lORSKSmpuZnP/vZyy+/PGXKlPz8fJtwIRaLbdiwYc6cOaNGjXIcJxaL2Sx1n/vc56zC8vjjj99888133HFHEASWHG2Ljxw9enTy5MkdHR2HDx/O6ETGmDfeeKOmpubTn/70ypUrEXHnzp2/+tWvtm/f/vDDD9uR1Frfd999a9assVIYeuPZiSgnJ6egoKC+vh4AOjo6urq6JkyY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" alt="Cardozo Engenharia Elétrica e Montagem Mecânica">
+  <h1>Programação Operacional</h1>
+</header>
+
+<section class="hoje">
+  <div class="hoje-cab">
+    <div>
+      <div class="d" id="dataSel">Hoje · Segunda-feira</div>
+      <div class="s" id="dataSub">24 de agosto de 2026</div>
+    </div>
+    <button class="btn-hoje" onclick="irHoje()" style="visibility: hidden;">Voltar para hoje</button>
+  </div>
+  <div class="letras" id="letras" data-render=""></div>
+</section>
+
+<div class="regua-box">
+  <div class="regua" id="regua" data-render=""></div>
+  <div class="regua-leg">
+    <span><i style="background:#E2A63C"></i>1º turno</span>
+    <span><i style="background:#5566C4"></i>2º turno</span>
+    <span><i style="background:#DFE3E8"></i>Folga</span>
+    <span style="margin-left:auto">Deslize para ver outros dias</span>
+  </div>
+</div>
+
+<nav class="abas" id="abas" data-render=""></nav>
+
+<div class="filtros" id="filtros" style="display: block;">
+  <input class="busca" id="busca" type="search" placeholder="Buscar colaborador, obra ou placa…" autocomplete="off">
+  <div class="selects" id="selects" data-render=""></div>
+</div>
+
+<main id="conteudo" data-render=""></main>
+
+
+</div>
+
+<div class="editor on" id="editor">
+  <label for="arq">Carregar base (.xlsx)</label>
+  <input type="file" id="arq" accept=".xlsx,.xlsm">
+  <button class="pri" onclick="baixarHTML()">Baixar painel atualizado</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script id="dados" type="application/json">{"meta":{"atualizado":"24/08/2026"},"pessoas":[{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes / Paulo Brito","disciplina":"Liderança","obra":"Encarregado de Turno","letra":"A","nome":"Bernardo Sena","papel":"Encarregado","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes / Paulo Brito","disciplina":"Liderança","obra":"Encarregado de Turno","letra":"B","nome":"Leonardo Coutinho","papel":"Encarregado","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes / Paulo Brito","disciplina":"Liderança","obra":"Encarregado de Turno","letra":"C","nome":"Weviley Borges","papel":"Encarregado","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes / Paulo Brito","disciplina":"Liderança","obra":"Encarregado de Turno","letra":"D","nome":"Anderson Aparecido","papel":"Encarregado","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Apoio Operacional","letra":"A","nome":"Igor Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"01/09/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Apoio Operacional","letra":"C","nome":"Presley Rosário","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Apoio Operacional","letra":"D","nome":"Guilherme Lima","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"28/08/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Automação","letra":"A","nome":"Bruno Cota","papel":"Condutor","equipamento":"CDZ027","placa":"TYZ9F56","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Automação","letra":"A","nome":"Thomás Aurélio","papel":"Colaborador","equipamento":"CDZ027","placa":"TYZ9F56","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Automação","letra":"B","nome":"Gabriel Melo","papel":"Condutor","equipamento":"CDZ027","placa":"TYZ9F56","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Automação","letra":"B","nome":"Gilmar Rodrigues","papel":"Colaborador","equipamento":"CDZ027","placa":"TYZ9F56","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Automação","letra":"C","nome":"Raquel Lino","papel":"Condutor","equipamento":"CDZ027","placa":"TYZ9F56","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Automação","letra":"C","nome":"Renan Henrique","papel":"Colaborador","equipamento":"CDZ027","placa":"TYZ9F56","otj":"","situacao":"","inicio":"26/08/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Automação","letra":"D","nome":"Rodrigo Antônio","papel":"Condutor","equipamento":"CDZ027","placa":"TYZ9F56","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Automação","letra":"D","nome":"Voltaire Payoutte","papel":"Colaborador","equipamento":"CDZ027","placa":"TYZ9F56","otj":"","situacao":"","inicio":"05/09/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"VL Logística","letra":"A","nome":"Hugo Vinicius","papel":"Condutor","equipamento":"","placa":"","otj":"Sim","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"VL Logística","letra":"D","nome":"Gabriel Augusto","papel":"Condutor","equipamento":"","placa":"","otj":"Sim","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Equipagem Elétrica BPF-PLANO","letra":"A","nome":"Deivisson Marcks","papel":"Condutor","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Equipagem Elétrica BPF-PLANO","letra":"B","nome":"Jorge Neves","papel":"Condutor","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Equipagem Elétrica BPF-PLANO","letra":"C","nome":"Evildson Ribeiro","papel":"Condutor","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Equipagem Elétrica BPF-PLANO","letra":"D","nome":"Kevin Costner","papel":"Colaborador","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Equipagem Elétrica BPF-CRO","letra":"A","nome":"Caio Viana","papel":"Colaborador","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"24/08/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Equipagem Elétrica BPF-CRO","letra":"B","nome":"João Lucas","papel":"Colaborador","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Equipagem Elétrica BPF-CRO","letra":"C","nome":"Washington Santos","papel":"Colaborador","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Equipagem Elétrica BPF-CRO","letra":"D","nome":"Junio Santos","papel":"Colaborador","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Manutenção Elétrica Planejada","letra":"A","nome":"Lucas Saleme","papel":"Colaborador","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Manutenção Elétrica Planejada","letra":"B","nome":"Junio Afonso","papel":"Colaborador","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Manutenção Elétrica Planejada","letra":"C","nome":"Gabriel Santiago","papel":"Colaborador","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Manutenção Elétrica Planejada","letra":"D","nome":"Wesley Monteiro","papel":"Colaborador","equipamento":"CDZ25","placa":"TYZ9F55","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Projeto Flexibilidade","letra":"A","nome":"Wesley Romualdo","papel":"Condutor","equipamento":"CDZ17","placa":"TYI3J08","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Projeto Flexibilidade","letra":"A","nome":"Glaycon Fernando","papel":"Colaborador","equipamento":"CDZ17","placa":"TYI3J08","otj":"","situacao":"","inicio":"16/08/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Projeto Flexibilidade","letra":"B","nome":"João Vitor","papel":"Condutor","equipamento":"CDZ17","placa":"TYI3J08","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Projeto Flexibilidade","letra":"B","nome":"Luiz Fernando","papel":"Colaborador","equipamento":"CDZ17","placa":"TYI3J08","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Projeto Flexibilidade","letra":"C","nome":"Carlos Junior","papel":"Condutor","equipamento":"CDZ17","placa":"TYI3J08","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Projeto Flexibilidade","letra":"C","nome":"Diogo da Mota","papel":"Colaborador","equipamento":"CDZ17","placa":"TYI3J08","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Projeto Flexibilidade","letra":"D","nome":"Wander Lúcio","papel":"Condutor","equipamento":"CDZ17","placa":"TYI3J08","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Projeto Flexibilidade","letra":"D","nome":"Ricardo Guerra","papel":"Colaborador","equipamento":"CDZ17","placa":"TYI3J08","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Ferramentaria","letra":"A","nome":"João Wellington","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Ferramentaria","letra":"B","nome":"Anthony Omar","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Ferramentaria","letra":"C","nome":"Fabrício Resende","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Elétrica","obra":"Ferramentaria","letra":"D","nome":"Paulo Brandão","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Planta de Concreto","letra":"A/B","nome":"Narmillen Chanietto","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Obra Spot","letra":"A/B","nome":"Rodrigo Silva","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Obra Spot","letra":"A/B","nome":"Gabriel Vinicius","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Obra Spot","letra":"C/D","nome":"Wendrell Leone","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Obra Spot","letra":"C/D","nome":"Lucas Otávio","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Manutenções","letra":"A/B","nome":"Marco Aurélio","papel":"Condutor","equipamento":"CDZ24","placa":"TYZ9F74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Manutenções","letra":"A/B","nome":"Luiz Gustavo","papel":"Condutor","equipamento":"CDZ29","placa":"TYZ9F95","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Manutenções","letra":"A/B","nome":"Wanderson Marçal","papel":"Condutor","equipamento":"CDZ023","placa":"TYZ9G01","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Manutenções","letra":"C/D","nome":"Denis Brandão","papel":"Condutor","equipamento":"CDZ24","placa":"TYZ9F74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Manutenções","letra":"C/D","nome":"Riclei Marques","papel":"Condutor","equipamento":"CDZ29","placa":"TYZ9F95","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Alta Tensão","obra":"Alta Tensão - Manutenções","letra":"C/D","nome":"Gabriel Teixeira","papel":"Condutor","equipamento":"CDZ023","placa":"TYZ9G01","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Apoio Operacional","letra":"A","nome":"Robert Gonçalves","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"01/09/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica BPF-PLANO","letra":"A","nome":"Douglas Patrick","papel":"Condutor","equipamento":"CDZ31","placa":"TYZ9F87","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica BPF-PLANO","letra":"B","nome":"Charles Santos","papel":"Condutor","equipamento":"CDZ31","placa":"TYZ9F87","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica BPF-PLANO","letra":"C","nome":"Alexandre Vitoriano","papel":"Condutor","equipamento":"CDZ31","placa":"TYZ9F87","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica BPF-PLANO","letra":"D","nome":"José Pereira","papel":"Condutor","equipamento":"CDZ31","placa":"TYZ9F87","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica BPF-CRO","letra":"A","nome":"Igor Cipriano","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica BPF-CRO","letra":"B","nome":"Luiz Augusto","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica BPF-CRO","letra":"C","nome":"Matheus Vitor","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"03/09/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica BPF-CRO","letra":"D","nome":"Guilherme Lima","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"23/08/2026","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica BPF-CRO","letra":"D","nome":"Nathan Gustavo","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"05/09/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica Corretiva-01","letra":"A","nome":"Augusto Franco","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica Corretiva-01","letra":"B","nome":"Fernando Custodio","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica Corretiva-01","letra":"C","nome":"João Vitor Santos","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica Corretiva-01","letra":"D","nome":"Romeu Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"05/09/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica Corretiva-02","letra":"A","nome":"Alexandre Reis","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica Corretiva-02","letra":"B","nome":"Philipe Augusto","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"01/09/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica Corretiva-02","letra":"C","nome":"Renan Oliveira","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"21/08/2026","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica Corretiva-02","letra":"C","nome":"Cauã Phillipe","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"03/09/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica Corretiva-02","letra":"D","nome":"Igor Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"30/08/2026","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Equipagem Mecânica Corretiva-02","letra":"D","nome":"Gustavo Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"05/09/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Manutenção Mecânica Planejada","letra":"A","nome":"Breno Abel","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Manutenção Mecânica Planejada","letra":"B","nome":"Dário Junior","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Manutenção Mecânica Planejada","letra":"C","nome":"Háviner Sena","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Jeferson Gomes","disciplina":"Mecânica","obra":"Manutenção Mecânica Planejada","letra":"D","nome":"Wilson Junior","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"05/09/2026","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Facilities","obra":"Apoio Munck","letra":"A","nome":"Caique Phelype","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Facilities","obra":"Apoio Munck","letra":"B","nome":"Luciano Paulo","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Facilities","obra":"Apoio Munck","letra":"C","nome":"Welington Dias","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Facilities","obra":"Apoio Munck","letra":"D","nome":"Italo Carrion","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Facilities","obra":"Limpeza","letra":"C","nome":"Wellington Fernandes","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Facilities","obra":"Limpeza","letra":"D","nome":"Michell Lopes","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"A","nome":"Warlley Serafim","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"A","nome":"Anderson Ramos","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"A","nome":"Ricardo Rodrigues","papel":"Operador de plataforma","equipamento":"CDZ-022","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"A","nome":"Weverton Johnny","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"A","nome":"Willer Aleme","papel":"Condutor","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"B","nome":"Brayan Dias","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"B","nome":"Marcelo Maciel","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"B","nome":"Frederico","papel":"Operador de plataforma","equipamento":"CDZ-022","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"B","nome":"Wesley Meyer","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"B","nome":"Carlos Daniel","papel":"Condutor","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"C","nome":"Aldivan Barbosa","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"C","nome":"Adrian Muller","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"C","nome":"Cleber Soares","papel":"Operador de plataforma","equipamento":"CDZ-022","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"C","nome":"Yago Chilaverth","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"C","nome":"André Marcos","papel":"Condutor","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"D","nome":"Pedro de Deus","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"D","nome":"Samuel Souza","papel":"Condutor","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"D","nome":"Deivy Santos","papel":"Operador de plataforma","equipamento":"CDZ-022","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"D","nome":"Pedro Cassimiro","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Caldeiraria","letra":"D","nome":"Thyago Augusto","papel":"Colaborador","equipamento":"CDZ14","placa":"TXA2J74","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"JCB MT - Projeto Flexibilidade","letra":"A","nome":"Éder Custodio","papel":"Operador JCB","equipamento":"MT-01","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"JCB MT - Projeto Flexibilidade","letra":"B","nome":"Arley Santos","papel":"Operador JCB","equipamento":"MT-01","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"JCB MT - Projeto Flexibilidade","letra":"C","nome":"Josevaldo Felipe","papel":"Operador JCB","equipamento":"MT-01","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"JCB MT - Projeto Flexibilidade","letra":"D","nome":"Lourenço Junior","papel":"Operador JCB","equipamento":"MT-01","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"JCB MT - Obra de Infraestrutura","letra":"B","nome":"Wanderson Celeste","papel":"Operador JCB","equipamento":"CDZ-034","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"JCB MT - Obra de Infraestrutura","letra":"D","nome":"Leornardo Andrade","papel":"Operador JCB","equipamento":"CDZ-034","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Facilities","obra":"Casa de Lanterna","letra":"A/B","nome":"Medrielly Alice","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Facilities","obra":"Casa de Lanterna","letra":"C/D","nome":"Liliane Daniele","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Manutenção Mecânica","letra":"A/B","nome":"Wanderson Teles","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 T1 - Cuiabá","supervisor":"Paulo Brito","disciplina":"Mecânica","obra":"Manutenção Mecânica","letra":"C/D","nome":"Arthur Captein","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Juarez Silva","disciplina":"Segurança","obra":"Gestão TST Subsolo - Cuiabá","letra":"A","nome":"Ana Paula","papel":"TST","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Subsolo 4x4 - Cuiabá","supervisor":"Juarez Silva","disciplina":"Segurança","obra":"Gestão TST Subsolo - Cuiabá","letra":"C","nome":"Renata","papel":"TST","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Lamego","regime":"Subsolo ADM - Lamego","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Elétrica BPF - Lamego","letra":"ADM","nome":"Adenilton Melo","papel":"Colaborador","equipamento":"CDZ01","placa":"TYI3J66","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Lamego","regime":"Subsolo ADM - Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Obra Spot - Adequações Caldeiraria Subsolo Lamego","letra":"ADM","nome":"Marcos Vinicius","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Lamego","regime":"Subsolo 4x4 - Lamego","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Adequação Elétrica - Lamego","letra":"B","nome":"Pablo Equiton","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Lamego","regime":"Subsolo 4x4 - Lamego","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Adequação Elétrica - Lamego","letra":"B","nome":"Pedro Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"15/08/2026","fim":"","obs":""},{"unidade":"AGA Lamego","regime":"Subsolo 4x4 T1 - Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Equipagem - 1º Turno (Equipe 1) - Lamego","letra":"D","nome":"Carlos Eduardo","papel":"Colaborador","equipamento":"CDZ028","placa":"TYZ9F75","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Lamego","regime":"Subsolo 4x4 T1 - Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Equipagem - 1º Turno (Equipe 1) - Lamego","letra":"D","nome":"Breno Costa","papel":"Colaborador","equipamento":"CDZ028","placa":"TYZ9F75","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Lamego","regime":"Subsolo 4x4 T1 - Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Equipagem - 1º Turno (Equipe 1) - Lamego","letra":"D","nome":"Thiago Rian","papel":"Colaborador","equipamento":"CDZ028","placa":"TYZ9F75","otj":"","situacao":"","inicio":"28/08/2026","fim":"","obs":""},{"unidade":"AGA Lamego","regime":"Subsolo 4x4 T1 - Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Equipagem - 1º Turno (Equipe 2) - Lamego","letra":"A","nome":"Warlei Viana","papel":"Colaborador","equipamento":"CDZ028","placa":"TYZ9F75","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Lamego","regime":"Subsolo 4x4 T1 - Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Equipagem - 1º Turno (Equipe 2) - Lamego","letra":"A","nome":"Yuri de Paula","papel":"Condutor","equipamento":"CDZ028","placa":"TYZ9F75","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"Sede Cardozo","regime":"Sede ADM","supervisor":"Gabriel Braga","disciplina":"Apoio","obra":"Adequações","letra":"ADM","nome":"Gustavo Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"26/08/2026","fim":"28/08/2026","obs":"Atuou 18 a 21/08 · folga 22 a 25/08 · atua 26/08 á 28/08 na Sede"},{"unidade":"Sede Cardozo","regime":"Sede ADM","supervisor":"Gabriel Braga","disciplina":"Apoio","obra":"Adequações","letra":"ADM","nome":"Cauã Phillipe","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"26/08/2026","fim":"28/08/2026","obs":"Atuou 18 a 21/08 · folga 22 a 25/08 · atua 26/08 á 28/08 na Sede"},{"unidade":"Sede Cardozo","regime":"Sede ADM","supervisor":"Gabriel Braga","disciplina":"Apoio","obra":"Adequações","letra":"ADM","nome":"Robert Gonçalves","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"26/08/2026","fim":"28/08/2026","obs":"Atuou 18 a 21/08 · folga 22 a 25/08 · atua 26/08 á 28/08 na Sede"},{"unidade":"Sede Cardozo","regime":"Sede ADM","supervisor":"Gabriel Braga","disciplina":"Apoio","obra":"Adequações","letra":"ADM","nome":"Nathan Gustavo","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"26/08/2026","fim":"28/08/2026","obs":"Atuou 18 a 21/08 · folga 22 a 25/08 · atua 26/08 á 28/08 na Sede"},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Instalação Analisador Online Blue Cupe","letra":"ADM","nome":"Claudiano","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"27/08/2026","fim":"28/08/2026","obs":"Apenas dias 27 e 28/08"},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Instalação Analisador Online Blue Cupe","letra":"ADM","nome":"Sidnei","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"27/08/2026","fim":"28/08/2026","obs":"Apenas dias 27 e 28/08"},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Instalação Analisador Online Blue Cupe","letra":"ADM","nome":"Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"27/08/2026","fim":"28/08/2026","obs":"Apenas dias 27 e 28/08"},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Planta de refrigeração","letra":"ADM","nome":"Walerson Fernandes","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Instalação Analisador Online Blue Cupe","letra":"ADM","nome":"Ednei Alves","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"28/08/2026","fim":"28/08/2026","obs":"Apenas dia 28/08"},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Montagem de Infra - Análise Não Britável","letra":"ADM","nome":"Ednei Alves","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"26/08/2026","fim":"26/08/2026","obs":"Apenas dia 26/08"},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Montagem de Infra - Análise Não Britável","letra":"ADM","nome":"Claudiano","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"25/08/2026","fim":"26/08/2026","obs":"Dias 25 e 26/08"},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Montagem de Infra - Análise Não Britável","letra":"ADM","nome":"Sidnei","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"25/08/2026","fim":"26/08/2026","obs":"Dias 25 e 26/08"},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Montagem de Infra - Análise Não Britável","letra":"ADM","nome":"Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"25/08/2026","fim":"26/08/2026","obs":"Dias 25 e 26/08"},{"unidade":"AGA CDS","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Adequação SPDA de estruturas","letra":"ADM","nome":"Ednei Alves","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"27/08/2026","fim":"27/08/2026","obs":"Apenas dia 27/08"},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Juarez Silva","disciplina":"Segurança","obra":"Gestão TST - ADM Cuiabá","letra":"ADM","nome":"Ana Carolina","papel":"TST","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Juarez Silva","disciplina":"Segurança","obra":"Gestão TST - ADM Cuiabá","letra":"ADM","nome":"Kauan Luck","papel":"TST","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Cuiabá","regime":"Superfície ADM","supervisor":"Juarez Silva","disciplina":"Segurança","obra":"Gestão TST - ADM Cuiabá","letra":"ADM","nome":"Welisson","papel":"TST","equipamento":"","placa":"","otj":"","situacao":"Férias","inicio":"","fim":"","obs":""},{"unidade":"AGA Queiroz","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Montagem de Infraestrutura - Tanque 590 - Queiroz","letra":"ADM","nome":"Lucas Samanez","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Queiroz","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Montagem de Infraestrutura - Tanque 590 - Queiroz","letra":"ADM","nome":"Geraldo","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Queiroz","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Montagem de Infraestrutura - Tanque 590 - Queiroz","letra":"ADM","nome":"Sidnei","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"24/08/2026","fim":"24/08/2026","obs":"Apenas dia 24/08"},{"unidade":"AGA Queiroz","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Montagem de Infraestrutura - Tanque 590 - Queiroz","letra":"ADM","nome":"Francisco","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Queiroz","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Montagem de Infraestrutura - Tanque 590 - Queiroz","letra":"ADM","nome":"Domingos","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Queiroz","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Montagem de Infraestrutura - Tanque 590 - Queiroz","letra":"ADM","nome":"Wilson","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Queiroz","regime":"Superfície ADM","supervisor":"Gabriel Braga","disciplina":"Elétrica","obra":"Manutenção Elétrica Teleférico","letra":"ADM","nome":"Mailson","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA Queiroz","regime":"Superfície ADM","supervisor":"Juarez Silva","disciplina":"Segurança","obra":"Gestão TST - ADM Queiroz","letra":"ADM","nome":"Carlos Eduardo","papel":"TST","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA CDS","regime":"Subsolo 5x2 - CDS","supervisor":"Fabiano Gomes","disciplina":"Mecânica","obra":"Infraestrutura de Subsolo - CDS","letra":"ADM","nome":"Herivelton Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA CDS","regime":"Subsolo 5x2 - CDS","supervisor":"Fabiano Gomes","disciplina":"Mecânica","obra":"Infraestrutura de Subsolo - CDS","letra":"ADM","nome":"Ronildo Siqueira","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA CDS","regime":"Subsolo 5x2 - CDS","supervisor":"Fabiano Gomes","disciplina":"Mecânica","obra":"Infraestrutura de Subsolo - CDS","letra":"ADM","nome":"Luan Felipe","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA CDS","regime":"Subsolo 5x2 - CDS","supervisor":"Fabiano Gomes","disciplina":"Mecânica","obra":"Infraestrutura de Subsolo - CDS","letra":"ADM","nome":"Paulo Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA CDS","regime":"Subsolo 5x2 - CDS","supervisor":"Fabiano Gomes","disciplina":"Mecânica","obra":"Infraestrutura de Subsolo - CDS","letra":"ADM","nome":"Mocly Oliveira","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA CDS","regime":"Subsolo 5x2 - CDS","supervisor":"Fabiano Gomes","disciplina":"Mecânica","obra":"Infraestrutura de Subsolo - CDS","letra":"ADM","nome":"Wesley Nunes","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"AGA CDS","regime":"Subsolo 5x2 - CDS","supervisor":"Fabiano Gomes","disciplina":"Mecânica","obra":"Infraestrutura de Subsolo - CDS","letra":"ADM","nome":"Marcelino Carlos","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"Sede Cardozo","regime":"Sede ADM","supervisor":"Fernando Cardozo","disciplina":"Apoio","obra":"Sede Cardozo","letra":"ADM","nome":"Marlon","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"Sede Cardozo","regime":"Sede ADM","supervisor":"Fernando Cardozo","disciplina":"Apoio","obra":"Sede Cardozo","letra":"ADM","nome":"Orlando","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"","fim":"","obs":""},{"unidade":"Sede Cardozo","regime":"Sede ADM","supervisor":"Gabriel Braga","disciplina":"Apoio","obra":"Adequações","letra":"ADM","nome":"Claudiano","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"24/08/2026","fim":"24/08/2026","obs":"Apenas dia 24/08"},{"unidade":"Sede Cardozo","regime":"Sede ADM","supervisor":"Gabriel Braga","disciplina":"Apoio","obra":"Adequações","letra":"ADM","nome":"Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"24/08/2026","fim":"24/08/2026","obs":"Apenas dia 24/08"},{"unidade":"Sede Cardozo","regime":"Sede ADM","supervisor":"Gabriel Braga","disciplina":"Apoio","obra":"Adequações","letra":"ADM","nome":"Arthur Félix","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"","inicio":"24/08/2026","fim":"28/08/2026","obs":"Semana de 24 a 28/08"},{"unidade":"AGA Lamego","regime":"Obra spot - Subsolo Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Obra Spot - Lamego","letra":"SPOT","nome":"Gustavo Henrique","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"Folga","inicio":"22/08/2026","fim":"25/08/2026","obs":"Folga do ciclo — atuou de 18 a 21/08"},{"unidade":"AGA Lamego","regime":"Obra spot - Subsolo Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Obra Spot - Lamego","letra":"SPOT","nome":"Cauã Phillipe","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"Folga","inicio":"22/08/2026","fim":"25/08/2026","obs":"Folga do ciclo — atuou de 18 a 21/08"},{"unidade":"AGA Lamego","regime":"Obra spot - Subsolo Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Obra Spot - Lamego","letra":"SPOT","nome":"Robert Gonçalves","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"Folga","inicio":"22/08/2026","fim":"25/08/2026","obs":"Folga do ciclo — atuou de 18 a 21/08"},{"unidade":"AGA Lamego","regime":"Obra spot - Subsolo Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Obra Spot - Lamego","letra":"SPOT","nome":"Nathan Gustavo","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"Folga","inicio":"22/08/2026","fim":"25/08/2026","obs":"Folga do ciclo — atuou de 18 a 21/08"},{"unidade":"AGA Lamego","regime":"Obra spot - Subsolo Lamego","supervisor":"Gabriel Braga","disciplina":"Mecânica","obra":"Obra Spot - Lamego","letra":"SPOT","nome":"Ednei Alves","papel":"Colaborador","equipamento":"","placa":"","otj":"","situacao":"Folga","inicio":"22/08/2026","fim":"25/08/2026","obs":"Folga do ciclo — atuou de 18 a 21/08"}],"frota":[["AGA Cuiabá","Supervisão - Jeferson Gomes","VL","CDZ-001","TXA-7G66",""],["AGA Cuiabá","Supervisão - Paulo Brito","VL","CDZ-002","TXA-8J47",""],["AGA Cuiabá","Automação","VL","CDZ027","TYZ9F56",""],["AGA Cuiabá","Equipagem Elétrica","VL","CDZ25","TYZ9F55","Compartilhada"],["AGA Cuiabá","Projeto Flexibilidade","VL","CDZ17","TYI3J08",""],["AGA Cuiabá","Equipagem Mecânica","VL","CDZ31","TYZ9F87",""],["AGA Cuiabá","Caldeiraria","VL","CDZ14","TXA2J74",""],["AGA Cuiabá","Alta Tensão - Manutenções","VL","CDZ24","TYZ9F74",""],["AGA Cuiabá","Alta Tensão - Manutenções","VL","CDZ29","TYZ9F95",""],["AGA Cuiabá","Alta Tensão - Manutenções","VL","CDZ023","TYZ9G01",""],["AGA Lamego","Elétrica BPF - Lamego","VL","CDZ01","TYI3J66",""],["AGA Lamego","Equipagem - 1º Turno","VL","CDZ028","TYZ9F75",""],["AGA Cuiabá","Reserva de manutenção","VL reserva","CDZ-015","TXA2J73",""],["Cuiabá e Lamego","Reserva de manutenção","VL reserva","CDZ-003","TOK8H30","Atende as duas unidades"],["AGA Cuiabá","Projeto Flexibilidade","JCB MT","MT-01","","Manipulador telescópico"],["AGA Cuiabá","Obra de Infraestrutura","JCB MT","CDZ-034","","Manipulador telescópico"],["AGA Cuiabá","Caldeiraria","JCB MT","CDZ-022","","Manipulador telescópico"],["AGA Cuiabá","Paste Fill","JCB MT","","","Sem equipamento mobilizado"],["","Logística - Ida e Volta","Onix","","PZV8538","Denis Brandão"],["","Logística - Ida e Volta","Ka","","QNT1C87","Marlon"],["AGA Queiroz","Logística - Ida e Volta","Strada","CDZ-07","RTL2G77",""],["","Logística - Ida e Volta","Polo","CDZ-30","UBZ1E12","Adenilton Melo"],["AGA Cuiabá","Logística - Ida e Volta","Polo","CDZ-26","UBZ1B56","Supervisão"],["","Logística - Ida e Volta","Polo","CDZ-32","UBZ1B16","Fabiano Gomes"]],"escala":[["A","24/08/2026"],["B","22/08/2026"],["C","26/08/2026"],["D","20/08/2026"]],"regimes":[["Subsolo 4x4 - Cuiabá","4x4-T1T2","08:00","18:50","20:20","07:10","Conforme letra"],["Subsolo 4x4 T1 - Cuiabá","4x4-T1","08:00","18:50","","","Conforme letra (só 1º turno)"],["Subsolo 4x4 - Lamego","4x4-T1T2","07:25","18:15","19:45","06:35","Conforme letra"],["Subsolo 4x4 T1 - Lamego","4x4-T1","07:25","18:15","","","Conforme letra (só 1º turno)"],["Subsolo ADM - Lamego","ADM","07:10","15:12","","","Seg a Sex"],["Superfície ADM","ADM","07:00","17:00","","","Seg a Sex"],["Sede ADM","ADM","07:00","17:00","","","Seg a Sex"],["Subsolo 5x2 - CDS","ADM","07:35","14:25","","","Seg a Sex"],["Obra spot - Subsolo Lamego","Pontual-T1","07:25","18:15","","","1º turno, datas na coluna Início/Fim"]],"config":[["Título","Programação Operacional"],["Ciclo 4x4 (sequência de 8 dias)","T1, T1, T2, T2, Folga, Folga, Folga, Folga"],["Vigência exibida no painel","21/08/2026"]]}</script>
+<script>
+/* ═══════════════ Dados e configuração ═══════════════ */
+let D = JSON.parse(document.getElementById('dados').textContent);
+
+const CICLO = ['T1','T1','T2','T2','F','F','F','F'];
+const DIAS_SEM = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DIAS_LONG = ['Domingo','Segunda-feira','Terça-feira','Quarta-feira','Quinta-feira','Sexta-feira','Sábado'];
+const MESES = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+
+function pd(s){ // aceita dd/mm/aaaa, aaaa-mm-dd ou número de série do Excel
+  if(s===null||s===undefined||s==='') return null;
+  if(typeof s==='number') return new Date(Math.round((s-25569)*86400000));
+  s=String(s).trim(); if(!s) return null;
+  let m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
+  if(m){
+    let d=+m[1], mes=+m[2], a=+m[3]; if(a<100) a+=2000;
+    if(mes>12 && d<=12){ const t=d; d=mes; mes=t; }   // veio como mm/dd
+    return new Date(a, mes-1, d);
+  }
+  m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return new Date(+m[1], +m[2]-1, +m[3]);
+  return null;
+}
+function dstr(d){ return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
+function d0(d){ return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function addDias(d,n){ const x=d0(d); x.setDate(x.getDate()+n); return x; }
+function difDias(a,b){ return Math.round((d0(a)-d0(b))/86400000); }
+
+const REF = {};   // letra -> Date do 1º dia do ciclo
+function carregarRef(){
+  Object.keys(REF).forEach(k=>delete REF[k]);
+  (D.escala||[]).forEach(r=>{ const dt=pd(r[1]); if(dt) REF[String(r[0]).trim().toUpperCase()]=dt; });
+}
+const REG = {};   // nome do regime -> objeto
+function carregarReg(){
+  Object.keys(REG).forEach(k=>delete REG[k]);
+  (D.regimes||[]).forEach(r=>{
+    REG[r[0]] = {tipo:r[1], t1:[r[2],r[3]], t2:[r[4],r[5]], dias:r[6]};
+  });
+}
+function cfg(chave, padrao){
+  const l = (D.config||[]).find(c=>String(c[0]).toLowerCase().includes(chave));
+  return l ? l[1] : padrao;
+}
+
+/* Posição no ciclo de 8 dias para uma letra numa data */
+function passoCiclo(letra, data){
+  const r = REF[letra]; if(!r) return null;
+  return ((difDias(data, r) % 8) + 8) % 8;
+}
+/* Turno bruto da letra (T1 / T2 / F) */
+function turnoLetra(letra, data){
+  const p = passoCiclo(letra, data);
+  return p===null ? null : CICLO[p];
+}
+/* Turno efetivo de uma pessoa numa data: 'T1' | 'T2' | 'ADM' | 'F' | null */
+function turnoPessoa(p, data){
+  const reg = REG[p.regime] || {tipo:'ADM'};
+  const dw = data.getDay();
+  const L = (p.letra||'').trim().toUpperCase();
+
+  if(reg.tipo==='4x4-T1T2' || reg.tipo==='4x4-T1'){
+    if(L.includes('/')){                       // letras pareadas: só 1º turno
+      const partes = L.split('/').map(s=>s.trim());
+      const trabalha = partes.some(x => turnoLetra(x, data)==='T1');
+      return trabalha ? 'T1' : 'F';
+    }
+    const t = turnoLetra(L, data);
+    if(t===null) return null;
+    if(t==='F') return 'F';
+    return reg.tipo==='4x4-T1' ? 'T1' : t;
+  }
+  if(reg.tipo==='ADM')      return (dw>=1 && dw<=5) ? 'ADM' : 'F';
+  if(reg.tipo==='5x2-6x1'){
+    if(dw===0) return 'F';
+    if(dw>=1 && dw<=5) return 'ADM';
+    const ref = pd(cfg('sábado','22/08/2026'));  // sábado trabalhado de referência
+    if(!ref) return 'F';
+    return (Math.abs(difDias(data,ref)) % 14 === 0) ? 'ADM' : 'F';
+  }
+  if(reg.tipo==='Pontual-T1') return 'T1';       // obra spot em turno, vigência por Início/Fim
+  if(reg.tipo==='Pontual')  return 'ADM';        // obra spot administrativa
+  return null;
+}
+/* Situação preenchida (Férias, Afastado…) = fora da programação */
+function ausente(p){ return !!(p.situacao||'').trim(); }
+/* A data está dentro da janela Início / Fim da linha? */
+function dentroJanela(p, data){
+  const i = pd(p.inicio), f = pd(p.fim);
+  if(i && d0(data) < i) return false;
+  if(f && d0(data) > f) return false;
+  return true;
+}
+/* A pessoa está efetivamente programada nesta data? */
+function vigente(p, data){ return !ausente(p) && dentroJanela(p, data); }
+function horario(p, turno){
+  const reg = REG[p.regime]; if(!reg) return '';
+  if(turno==='T2' && reg.t2[0]) return reg.t2[0]+'–'+reg.t2[1];
+  if(reg.t1[0]) return reg.t1[0]+'–'+reg.t1[1];
+  return '';
+}
+
+/* ═══════════════ Estado ═══════════════ */
+const ABAS = [
+  {id:'dia',    r:'Do dia'},
+  {id:'equipes',r:'Equipes'},
+  {id:'pessoa', r:'Escala'},
+  {id:'frota',  r:'Frota'}
+];
+const S = { aba:'dia', data:d0(new Date()), q:'', f:{unidade:'',supervisor:'',disciplina:'',letra:'',obra:''}, pessoa:'' };
+
+function pessoas(){ return D.pessoas||[]; }
+function norm(s){ return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+
+function passaFiltro(p){
+  const f=S.f;
+  if(f.unidade    && p.unidade   !==f.unidade) return false;
+  if(f.supervisor && p.supervisor!==f.supervisor) return false;
+  if(f.disciplina && p.disciplina!==f.disciplina) return false;
+  if(f.obra       && p.obra      !==f.obra) return false;
+  if(f.letra      && !(p.letra||'').split('/').map(s=>s.trim()).includes(f.letra)) return false;
+  if(S.q){
+    const q=norm(S.q);
+    const alvo=norm([p.nome,p.obra,p.placa,p.equipamento,p.supervisor,p.disciplina,p.unidade].join(' '));
+    if(!alvo.includes(q)) return false;
+  }
+  return true;
+}
+
+/* ═══════════════ Render: cabeçalho do dia ═══════════════ */
+function renderTopo(){
+  const d = S.data, hoje = d0(new Date());
+  const ehHoje = difDias(d,hoje)===0;
+  document.getElementById('dataSel').textContent =
+    (ehHoje?'Hoje · ':'') + DIAS_LONG[d.getDay()];
+  document.getElementById('dataSub').textContent =
+    d.getDate()+' de '+['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'][d.getMonth()]+' de '+d.getFullYear();
+  document.querySelector('.btn-hoje').style.visibility = ehHoje ? 'hidden':'visible';
+
+  const box = document.getElementById('letras'); box.innerHTML='';
+  ['A','B','C','D'].forEach(L=>{
+    const t = turnoLetra(L, d) || 'F';
+    const rot = t==='T1'?'1º turno':t==='T2'?'2º turno':'Folga';
+    const hr  = t==='T1'?'08:00–18:50':t==='T2'?'20:20–07:10':'';
+    box.insertAdjacentHTML('beforeend',
+      `<div class="lt ${t}"><div class="n">${L}</div><div class="t">${rot}</div><div class="h">${hr}</div></div>`);
+  });
+}
+
+function renderRegua(){
+  const box=document.getElementById('regua'); box.innerHTML='';
+  const hoje=d0(new Date());
+  for(let i=-4;i<=17;i++){
+    const d=addDias(hoje,i);
+    const sel = difDias(d,S.data)===0;
+    let cells='';
+    ['A','B','C','D'].forEach(L=>{
+      const t=turnoLetra(L,d)||'F';
+      cells+=`<div class="c ${t}">${t==='F'?'':L}</div>`;
+    });
+    box.insertAdjacentHTML('beforeend',
+      `<button class="dia ${sel?'sel':''} ${i===0?'hoje-d':''}" data-i="${i}">
+         <div class="ds">${DIAS_SEM[d.getDay()]}</div>
+         <div class="dd">${String(d.getDate()).padStart(2,'0')}</div>
+         <div class="ds" style="font-size:8px">${MESES[d.getMonth()]}</div>
+         <div class="cells">${cells}</div>
+       </button>`);
+  }
+  box.querySelectorAll('.dia').forEach(b=>b.onclick=()=>{
+    S.data = addDias(hoje, +b.dataset.i); render();
+  });
+  const alvo = box.querySelector('.dia.sel');
+  if(alvo) alvo.scrollIntoView({block:'nearest',inline:'center'});
+}
+
+/* ═══════════════ Abas e filtros ═══════════════ */
+function renderAbas(){
+  const n=document.getElementById('abas'); n.innerHTML='';
+  ABAS.forEach(a=>{
+    const b=document.createElement('button');
+    b.textContent=a.r; b.className = S.aba===a.id?'on':'';
+    b.onclick=()=>{S.aba=a.id; render();};
+    n.appendChild(b);
+  });
+}
+function opcoes(campo){
+  const fora = OCULTA_FILTRO[campo]||[];
+  const s=new Set();
+  pessoas().forEach(p=>{ if(p[campo] && !fora.includes(p[campo])) s.add(p[campo]); });
+  return [...s].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+}
+function renderFiltros(){
+  const cx=document.getElementById('filtros');
+  cx.style.display = (S.aba==='pessoa'||S.aba==='frota') ? 'none':'block';
+  const box=document.getElementById('selects'); box.innerHTML='';
+  const defs=[['unidade','Unidade'],['supervisor','Supervisor'],['disciplina','Disciplina'],
+              ['obra','Obra'],['letra','Letra']];
+  defs.forEach(([k,rot])=>{
+    const sel=document.createElement('select');
+    let opts = k==='letra' ? ['A','B','C','D'] : opcoes(k);
+    sel.innerHTML = `<option value="">${rot}</option>` +
+      opts.map(o=>`<option value="${o}" ${S.f[k]===o?'selected':''}>${o}</option>`).join('');
+    if(S.f[k]) sel.classList.add('ativo');
+    sel.onchange=()=>{ S.f[k]=sel.value; render(); };
+    box.appendChild(sel);
+  });
+  if(Object.values(S.f).some(v=>v) || S.q){
+    const b=document.createElement('button'); b.className='limpar'; b.textContent='Limpar';
+    b.onclick=()=>{ S.f={unidade:'',supervisor:'',disciplina:'',letra:'',obra:''}; S.q='';
+      document.getElementById('busca').value=''; render(); };
+    box.appendChild(b);
+  }
+}
+
+/* ═══════════════ Componentes ═══════════════ */
+function veiculosDe(lista){
+  const s=new Set();
+  lista.forEach(p=>{
+    if(p.papel==='Operador JCB'||p.papel==='Operador de plataforma') return;
+    if(p.equipamento||p.placa) s.add((p.equipamento||'')+'|'+(p.placa||''));
+  });
+  return [...s].map(x=>x.split('|'));
+}
+function tagsObra(lista){
+  let h='';
+  const v=veiculosDe(lista);
+  if(v.length<=1) v.forEach(([e,p])=>{
+    if(e) h+=`<span class="tag">${e}</span>`;
+    if(p) h+=`<span class="tag placa">${p}</span>`;
+  });
+  const jcb=new Set();
+  lista.forEach(p=>{ if((p.papel==='Operador JCB'||p.papel==='Operador de plataforma') && p.equipamento) jcb.add(p.equipamento); });
+  [...jcb].forEach(t=>h+=`<span class="tag jcb">${t}</span>`);
+  return h;
+}
+function classeLetra(L){
+  if(!L) return 'adm';
+  if(L.includes('/')) return 'par';
+  if(['A','B','C','D'].includes(L)) return L;
+  return 'adm';
+}
+function badges(p, data, veicPessoal){
+  let h='';
+  if(veicPessoal && (p.equipamento||p.placa) && p.papel!=='Operador JCB' && p.papel!=='Operador de plataforma')
+    h+=`<span class="tag placa" style="font-size:9.5px">${p.placa||p.equipamento}</span>`;
+  if(p.papel==='Encarregado') h+='<span class="b enc">Encarregado</span>';
+  if(p.papel==='Condutor')    h+='<span class="b vl">VL</span>';
+  if(p.papel==='Operador JCB')h+=`<span class="b op">JCB ${p.equipamento||''}</span>`;
+  if(p.papel==='Operador de plataforma') h+=`<span class="b op">Plataforma ${p.equipamento||''}</span>`;
+  if(p.papel==='TST')         h+='<span class="b tst">TST</span>';
+  if(p.otj)                   h+='<span class="b otj">On the job</span>';
+  if(ausente(p))              h+=`<span class="b fer">${p.situacao}</span>`;
+  if(data && !dentroJanela(p,data)){
+    const i=pd(p.inicio), f=pd(p.fim);
+    if(i && d0(data)<i)      h+=`<span class="b data">entra ${dstr(i).slice(0,5)}</span>`;
+    else if(f && d0(data)>f) h+=`<span class="b data">até ${dstr(f).slice(0,5)}</span>`;
+  }
+  return h;
+}
+function linhaPessoa(p, data, mostrarLetra, veicPessoal){
+  const fora = data && !vigente(p,data);
+  const L = (p.letra||'').trim();
+  const rot = L==='ADM'?'ADM': L==='SPOT'?'SPOT': L==='5x2/6x1'?'5x2':L;
+  return `<li class="${fora?'fora':''}">
+    ${mostrarLetra?`<span class="let ${classeLetra(L)}">${rot||'—'}</span>`:''}
+    <span class="nome">${p.nome}${p.obs?`<small>${p.obs}</small>`:''}</span>
+    <span class="badges">${badges(p,data,veicPessoal)}</span></li>`;
+}
+function cardObra(obra, lista, data, mostrarLetra){
+  const veicPessoal = veiculosDe(lista).length>1;
+  const ordem = {'Encarregado':0,'Condutor':1,'Operador JCB':2,'Operador de plataforma':3,'TST':4,'Colaborador':5};
+  const L4 = {'A':0,'A/B':0.5,'B':1,'C':2,'C/D':2.5,'D':3,'ADM':8,'SPOT':8.5};
+  lista = [...lista].sort((a,b)=>{
+    const la=L4[a.letra]??9, lb=L4[b.letra]??9;
+    if(la!==lb) return la-lb;
+    return (ordem[a.papel]??9)-(ordem[b.papel]??9) || a.nome.localeCompare(b.nome,'pt-BR');
+  });
+  return `<div class="obra">
+    <div class="obra-cab">
+      <div class="nm">${obra}</div>
+      <div class="tags">${tagsObra(lista)}</div>
+    </div>
+    <ul class="pes">${lista.map(p=>linhaPessoa(p,data,mostrarLetra,veicPessoal)).join('')}</ul>
+  </div>`;
+}
+const ORD_DISC=['Liderança','Elétrica','Alta Tensão','Mecânica','Facilities','Segurança','Apoio'];
+const ORD_UN=['AGA Cuiabá','AGA Lamego','AGA Queiroz','AGA CDS','Sede Cardozo'];
+const ORD_UN_ADM=['AGA Lamego','AGA Cuiabá','AGA Queiroz','AGA CDS','Sede Cardozo'];
+const ORD_OBRA=['Encarregado de Turno','Apoio Operacional','Automação','VL Logística',
+ 'Equipagem Elétrica BPF-PLANO','Equipagem Elétrica BPF-CRO','Manutenção Elétrica Planejada',
+ 'Projeto Flexibilidade','Ferramentaria',
+ 'Alta Tensão - Planta de Concreto','Alta Tensão - Obra Spot','Alta Tensão - Manutenções',
+ 'Equipagem Mecânica BPF-PLANO','Equipagem Mecânica BPF-CRO','Equipagem Mecânica Corretiva-01',
+ 'Equipagem Mecânica Corretiva-02','Manutenção Mecânica Planejada','Caldeiraria',
+ 'JCB MT - Projeto Flexibilidade','JCB MT - Obra de Infraestrutura','JCB MT - Paste Fill',
+ 'Manutenção Mecânica','Apoio Munck','Limpeza','Casa de Lanterna','Gestão TST Subsolo - Cuiabá'];
+/* filtros não listam categorias internas de organização */
+const OCULTA_FILTRO={supervisor:['Jeferson Gomes / Paulo Brito'],
+                     disciplina:['Liderança','Apoio'],
+                     obra:['Encarregado de Turno']};
+function agrupar(lista, chave, ordUn){
+  const m=new Map();
+  lista.forEach(p=>{ const k=p[chave]; if(!m.has(k)) m.set(k,[]); m.get(k).push(p); });
+  const ord = chave==='disciplina'?ORD_DISC : chave==='unidade'?(ordUn||ORD_UN) : null;
+  const chaves=[...m.keys()].sort((a,b)=>{
+    if(ord){ const ia=ord.indexOf(a), ib=ord.indexOf(b);
+      if(ia!==ib) return (ia<0?99:ia)-(ib<0?99:ib); }
+    return String(a).localeCompare(String(b),'pt-BR');
+  });
+  return new Map(chaves.map(k=>[k,m.get(k)]));
+}
+/* obras podem repetir de nome em disciplinas diferentes (ex.: Apoio Operacional) */
+function agruparObras(lista){
+  const m=new Map();
+  lista.forEach(p=>{ const k=p.disciplina+' || '+p.obra; if(!m.has(k)) m.set(k,[]); m.get(k).push(p); });
+  return [...m.entries()].map(([k,v])=>[k.split(' || ')[1],v])
+    .sort((a,b)=>{
+      const ia=ORD_OBRA.indexOf(a[0]), ib=ORD_OBRA.indexOf(b[0]);
+      if(ia!==ib) return (ia<0?999:ia)-(ib<0?999:ib);
+      return a[0].localeCompare(b[0],'pt-BR');
+    });
+}
+
+/* ═══════════════ Aba: Do dia ═══════════════ */
+function abaDia(){
+  const data=S.data;
+  const ativos = pessoas().filter(p=>passaFiltro(p) && vigente(p,data));
+  const grupos = {T1:[],T2:[],ADM:[]};
+  ativos.forEach(p=>{ const t=turnoPessoa(p,data); if(grupos[t]) grupos[t].push(p); });
+
+  let h = `<div class="resumo">
+    <div class="kpi t1"><div class="v">${grupos.T1.length}</div><div class="l">1º turno</div></div>
+    <div class="kpi t2"><div class="v">${grupos.T2.length}</div><div class="l">2º turno</div></div>
+    <div class="kpi adm"><div class="v">${grupos.ADM.length}</div><div class="l">Adm</div></div>
+  </div>`;
+
+  const secoes=[['T1','1º Turno'],['T2','2º Turno'],['ADM','Subsolo ADM e superfície']];
+  let algum=false;
+  secoes.forEach(([k,rot])=>{
+    const lst=grupos[k]; if(!lst.length) return;
+    algum=true;
+    const hh = k==='ADM' ? '' : (k==='T1'?'08:00–18:50':'20:20–07:10');
+    h += `<div class="bloco"><div class="bloco-tit"><span class="pill ${k}">${k==='ADM'?'ADM':k}</span>
+      <span class="p">${rot}</span><span class="hh">${hh}</span></div>`;
+    const porUnidade = agrupar(lst,'unidade', k==='ADM'?ORD_UN_ADM:null);
+    [...porUnidade.entries()].forEach(([un,pl])=>{
+      const porDisc = agrupar(pl,'disciplina');
+      [...porDisc.entries()].forEach(([disc,pd_])=>{
+        h += `<div class="sub">${disc}<span style="margin-left:auto;font-weight:600;color:var(--mut)">${un}</span></div>`;
+        agruparObras(pd_).forEach(([obra,pp])=>{ h += cardObra(obra,pp,data,true); });
+      });
+    });
+    h += `</div>`;
+  });
+  if(!algum) h += `<div class="vazio"><b>Ninguém programado</b>Nenhum colaborador atende aos filtros nesta data.</div>`;
+  return h;
+}
+
+/* ═══════════════ Aba: Equipes ═══════════════ */
+function abaEquipes(){
+  const lst = pessoas().filter(passaFiltro);
+  if(!lst.length) return `<div class="vazio"><b>Sem resultados</b>Ajuste a busca ou os filtros.</div>`;
+  let h='';
+  const porUn = agrupar(lst,'unidade');
+  [...porUn.entries()].forEach(([un,pu])=>{
+    h += `<div class="bloco"><div class="bloco-tit"><span class="p">${un}</span>
+      <span class="hh">${pu.length} ${pu.length===1?'posição':'posições'}</span></div>`;
+    const porDisc = agrupar(pu,'disciplina');
+    [...porDisc.entries()].forEach(([disc,pd_])=>{
+      h += `<div class="sub">${disc}</div>`;
+      agruparObras(pd_).forEach(([obra,pp])=>{ h += cardObra(obra,pp,S.data,true); });
+    });
+    h += `</div>`;
+  });
+  return h;
+}
+
+/* ═══════════════ Aba: Minha escala ═══════════════ */
+function abaPessoa(){
+  const nomes=[...new Set(pessoas().map(p=>p.nome))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  let h=`<div class="sub" style="margin-top:0">Minha escala<span style="margin-left:auto;font-weight:500;text-transform:none;letter-spacing:0">próximos 14 dias</span></div>
+    <div class="busca-pessoa">
+      <input class="busca" id="bp" list="ln" placeholder="Digite seu nome…" value="${S.pessoa}" autocomplete="off">
+      <datalist id="ln">${nomes.map(n=>`<option value="${n}">`).join('')}</datalist>`;
+  if(!S.pessoa){
+    const amostra = nomes.slice(0,6);
+    h+=`<div class="sug">${amostra.map(n=>`<button data-n="${n}">${n}</button>`).join('')}</div>`;
+  }
+  h+=`</div>`;
+
+  if(S.pessoa){
+    const regs = pessoas().filter(p=>norm(p.nome)===norm(S.pessoa))
+      .sort((a,b)=>(pd(a.inicio)||new Date(1900,0,1))-(pd(b.inicio)||new Date(1900,0,1)));
+    if(!regs.length){
+      h+=`<div class="vazio" style="margin-top:12px"><b>Não encontrado</b>Confira a grafia do nome.</div>`;
+    } else {
+      regs.forEach((p,i)=>{
+        h+=`<div class="pessoa-cab" style="margin-top:12px">
+          <div class="n">${i===0?p.nome:p.obra}</div>
+          <div class="i">${i===0?p.obra+'<br>':''}${p.unidade} · Letra <b>${p.letra||'—'}</b><br>Supervisor ${p.supervisor}
+          ${ausente(p)?` · <b style="color:#FFD27A">${p.situacao}</b>`:''}</div></div>`;
+        let linhas='', dias=0;
+        for(let i=0;i<14;i++){
+          const d=addDias(new Date(),i);
+          if(!dentroJanela(p,d)) continue;            // dia coberto por outra linha
+          dias++;
+          const t = ausente(p) ? 'SIT' : turnoPessoa(p,d);
+          const rot = t==='SIT'?p.situacao: t==='T1'?'1º turno': t==='T2'?'2º turno': t==='ADM'?'Adm':'Folga';
+          const cor = (t==='SIT'&&p.situacao!=='Folga')?'background:#FBEEE4;color:#8A4A16':
+                      t==='T1'?'background:var(--t1-bg);color:var(--t1)':
+                      t==='T2'?'background:var(--t2-bg);color:var(--t2)':
+                      t==='ADM'?'background:#E4EEE9;color:var(--ok)':'background:var(--fg-bg);color:var(--fg)';
+          linhas+=`<div class="l ${i===0?'hj':''}">
+            <span class="dt">${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')} <span>${DIAS_SEM[d.getDay()]}</span></span>
+            <span class="st" style="${cor}">${rot}</span>
+            <span class="hr">${(t==='T1'||t==='T2'||t==='ADM')?horario(p,t):''}</span></div>`;
+        }
+        h+= dias ? `<div class="prox">${linhas}</div>`
+                 : `<div class="prox"><div class="l" style="color:var(--mut);font-size:13px">
+                    Sem dias nos próximos 14 dias${p.inicio?` · começa em ${p.inicio}`:''}</div></div>`;
+      });
+    }
+  }
+  return h;
+}
+
+/* ═══════════════ Aba: Frota ═══════════════ */
+function abaFrota(){
+  const q=norm(S.q);
+  const f=(D.frota||[]).filter(r=>!q||norm(r.join(' ')).includes(q));
+  const grupos = new Map();
+  f.forEach(r=>{ const k=r[2]||'Outros'; if(!grupos.has(k)) grupos.set(k,[]); grupos.get(k).push(r); });
+  let h='';
+  [...grupos.entries()].forEach(([tipo,rs])=>{
+    h+=`<div class="sub">${tipo}</div><table class="frota">
+      <tr><th>Equipe / vínculo</th><th>TAG</th><th>Placa</th></tr>`;
+    rs.forEach(r=>{
+      const sub=[r[0],r[5]].filter(x=>String(x||'').trim()).join(' · ');
+      h+=`<tr><td>${r[1]}${sub?`<div style="font-size:11px;color:var(--mut)">${sub}</div>`:''}</td>
+      <td class="mono" style="font-size:11.5px">${r[3]||'—'}</td>
+      <td class="mono" style="font-size:11.5px">${r[4]||'—'}</td></tr>`;
+    });
+    h+=`</table>`;
+  });
+  return h || `<div class="vazio"><b>Sem resultados</b>Nenhum veículo encontrado.</div>`;
+}
+
+/* ═══════════════ Render principal ═══════════════ */
+function render(){
+  carregarRef(); carregarReg();
+  renderTopo(); renderRegua(); renderAbas(); renderFiltros();
+  const c=document.getElementById('conteudo');
+  c.innerHTML = S.aba==='dia'?abaDia(): S.aba==='equipes'?abaEquipes():
+                S.aba==='pessoa'?abaPessoa(): abaFrota();
+  if(S.aba==='pessoa'){
+    const bp=document.getElementById('bp');
+    if(bp){
+      bp.oninput=()=>{ const v=bp.value; clearTimeout(bp._t);
+        bp._t=setTimeout(()=>{ S.pessoa=v; render(); const n=document.getElementById('bp'); if(n){n.focus();} },350); };
+      bp.onchange=()=>{ S.pessoa=bp.value; render(); };
+    }
+    c.querySelectorAll('.sug button').forEach(b=>b.onclick=()=>{ S.pessoa=b.dataset.n; render(); });
+  }
+
+}
+/* garante que o título caiba em uma linha, com ou sem a fonte da web */
+function ajustaTitulo(){
+  const t=document.querySelector('header h1'); if(!t) return;
+  t.style.fontSize='';
+  let f=parseFloat(getComputedStyle(t).fontSize);
+  const max=t.parentElement.clientWidth - 2*parseFloat(getComputedStyle(t.parentElement).paddingLeft);
+  let g=0;
+  while(t.scrollWidth>max+0.5 && f>14 && g++<40){ f-=0.5; t.style.fontSize=f+'px'; }
+}
+addEventListener('resize', ajustaTitulo);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(ajustaTitulo);
+function irHoje(){ S.data=d0(new Date()); render(); }
+
+document.getElementById('busca').addEventListener('input', e=>{
+  clearTimeout(window._bt);
+  window._bt=setTimeout(()=>{ S.q=e.target.value; render(); document.getElementById('busca').focus(); },320);
+});
+
+/* ═══════════════ Modo editora ═══════════════ */
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2600); }
+
+if(new URLSearchParams(location.search).get('edit')==='1'){
+  document.getElementById('editor').classList.add('on');
+  document.body.style.paddingBottom='72px';
+  const FONTES=['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
+                'https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js',
+                'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js'];
+  (function carrega(i){
+    if(i>=FONTES.length){ toast('Não consegui carregar o leitor de planilhas. Verifique a internet.'); return; }
+    const s=document.createElement('script');
+    s.src=FONTES[i]; s.dataset.lazy='1';
+    s.onerror=()=>carrega(i+1);
+    document.head.appendChild(s);
+  })(0);
+}
+document.getElementById('arq').addEventListener('change', ev=>{
+  const f=ev.target.files[0]; if(!f) return;
+  if(typeof XLSX==='undefined'){ toast('Aguarde um instante e tente de novo.'); return; }
+  const fr=new FileReader();
+  fr.onload=e=>{
+    try{
+      const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+      const ler=n=>wb.Sheets[n]?XLSX.utils.sheet_to_json(wb.Sheets[n],{header:1,defval:'',raw:false}):null;
+      const base=ler('Base');
+      if(!base){ toast('A planilha precisa ter a aba "Base".'); return; }
+      const cab=base[0].map(x=>String(x).trim());
+      const ix=n=>cab.indexOf(n);
+      const novas=[];
+      for(let i=1;i<base.length;i++){
+        const r=base[i]; if(!r || !String(r[ix('Nome')]||'').trim()) continue;
+        novas.push({
+          unidade:String(r[ix('Unidade')]||'').trim(), regime:String(r[ix('Regime')]||'').trim(),
+          supervisor:String(r[ix('Supervisor')]||'').trim(), disciplina:String(r[ix('Disciplina')]||'').trim(),
+          obra:String(r[ix('Obra')]||'').trim(), letra:String(r[ix('Letra')]||'').trim(),
+          nome:String(r[ix('Nome')]||'').trim(), papel:String(r[ix('Papel')]||'Colaborador').trim(),
+          equipamento:String(r[ix('Equipamento')]||'').trim(), placa:String(r[ix('Placa')]||'').trim(),
+          otj:String(r[ix('On the Job')]||'').trim(), situacao:String(r[ix('Situação')]||'').trim(),
+          inicio:String(r[ix('Início')]||'').trim(),
+          fim:String(r[ix('Fim')]||'').trim(), obs:String(r[ix('Observação')]||'').trim()
+        });
+      }
+      D.pessoas=novas;
+      const fr_=ler('Frota'); if(fr_) D.frota=fr_.slice(1).filter(r=>r.some(c=>String(c).trim())).map(r=>r.map(c=>String(c||'').trim()));
+      const es=ler('Escala');  if(es) D.escala=es.slice(1).filter(r=>String(r[0]||'').trim()).map(r=>[String(r[0]).trim(),String(r[1]).trim()]);
+      const rg=ler('Regimes'); if(rg) D.regimes=rg.slice(1).filter(r=>String(r[0]||'').trim()).map(r=>r.map(c=>String(c||'').trim()));
+      const cf=ler('Config');  if(cf) D.config=cf.slice(1).filter(r=>String(r[0]||'').trim()).map(r=>[String(r[0]).trim(),String(r[1]||'').trim()]);
+      D.meta={atualizado:dstr(new Date())};
+      render();
+      toast(novas.length+' posições carregadas. Agora baixe o painel atualizado.');
+    }catch(err){ toast('Não foi possível ler o arquivo: '+err.message); }
+  };
+  fr.readAsArrayBuffer(f);
+});
+
+function baixarHTML(){
+  const doc=document.documentElement.cloneNode(true);
+  doc.querySelector('#dados').textContent=JSON.stringify(D);
+  doc.querySelectorAll('[data-render]').forEach(n=>n.innerHTML='');
+  doc.querySelectorAll('script[data-lazy]').forEach(n=>n.remove());
+  const blob=new Blob(['<!DOCTYPE html>\n'+doc.outerHTML],{type:'text/html;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download='programacao.html'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+  toast('Arquivo gerado. Publique no GitHub substituindo o anterior.');
+}
+
+render();
+ajustaTitulo();
+setTimeout(ajustaTitulo,300);
+</script>
+
+
+</body></html>
